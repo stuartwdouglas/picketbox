@@ -72,7 +72,9 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
    public boolean isValid(MessageInfo messageInfo, Subject clientSubject, String layer, String appContext, 
          CallbackHandler callbackHandler) 
    {
+      Object mandatoryObject = messageInfo.getMap().get("javax.security.auth.message.MessagePolicy.isMandatory");
 
+      final boolean mandatory = mandatoryObject == null ? false : Boolean.valueOf(mandatoryObject.toString());
       AuthConfigFactory factory = AuthConfigFactory.getFactory();
       AuthConfigProvider provider = factory.getConfigProvider(layer,appContext,null);
       if(provider == null)
@@ -102,7 +104,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
       {
          SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
          PicketBoxLogger.LOGGER.errorGettingServerAuthContext(authContextId, super.getSecurityDomain(), ae);
-         return false;
+         return !mandatory;
       }
          
       if(clientSubject == null)
@@ -120,7 +122,7 @@ extends JaasSecurityManagerBase implements ServerAuthenticationManager
           SecurityContextAssociation.getSecurityContext().getData().put(AuthException.class.getName(), ae);
           PicketBoxLogger.LOGGER.debugIgnoredException(ae);
       }
-      return AuthStatus.SUCCESS == status ;
+      return !mandatory || AuthStatus.SUCCESS == status ;
    }
    
    /*
