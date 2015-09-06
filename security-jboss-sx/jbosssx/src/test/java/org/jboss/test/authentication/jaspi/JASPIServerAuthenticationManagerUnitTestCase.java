@@ -84,6 +84,7 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
    {
       CallbackHandler cbh = new AppCallbackHandler("anil", "anilpwd".toCharArray());
       MessageInfo messageInfo = new GenericMessageInfo(new Object(), new Object());
+      messageInfo.getMap().put("javax.security.auth.message.MessagePolicy.isMandatory", "true");
       boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, cbh);
       assertTrue(valid);
    }
@@ -92,6 +93,7 @@ public class JASPIServerAuthenticationManagerUnitTestCase extends TestCase
    {
       CallbackHandler cbh = new AppCallbackHandler("anil", "dead".toCharArray());
       MessageInfo messageInfo = new GenericMessageInfo(new Object(), new Object());
+      messageInfo.getMap().put("javax.security.auth.message.MessagePolicy.isMandatory", "true");
       boolean valid = jaspiManager.isValid(messageInfo, new Subject(), layer, cbh);
       assertFalse(valid);
    }

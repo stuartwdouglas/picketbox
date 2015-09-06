@@ -175,6 +175,7 @@ public class AuthContext2UnitTestCase extends TestCase
       JASPIServerAuthenticationManager aContext = new JASPIServerAuthenticationManager(policyName,
             handler);  
       GenericMessageInfo requestMessage = new GenericMessageInfo(new Object(), new Object());
+      requestMessage.getMap().put("javax.security.auth.message.MessagePolicy.isMandatory", "true");
       return  aContext.isValid(requestMessage, new Subject(), "HttpServlet", 
             handler); 
    }
