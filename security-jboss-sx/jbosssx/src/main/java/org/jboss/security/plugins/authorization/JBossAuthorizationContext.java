@@ -140,21 +140,20 @@ public class JBossAuthorizationContext extends AuthorizationContext
 
          initializeModules(resource, callerRoles, modules, controlFlags); 
 
-         AccessController.doPrivileged(new PrivilegedExceptionAction<Object>()
+         if(System.getSecurityManager() == null)
          {
-            public Object run() throws AuthorizationException
+            doAuthorize(resource, modules, controlFlags);
+         } else
+         {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>()
             {
-               int result = invokeAuthorize(resource, modules, controlFlags);
-               if (result == PERMIT)
-                  invokeCommit( modules, controlFlags );
-               if (result == DENY)
+               public Object run() throws AuthorizationException
                {
-                  invokeAbort( modules, controlFlags );
-                  throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
+                  doAuthorize(resource, modules, controlFlags);
+                  return null;
                }
-               return null;
-            }
-         });
+            });
+         }
       }
       catch (PrivilegedActionException e)
       {
@@ -170,6 +169,17 @@ public class JBossAuthorizationContext extends AuthorizationContext
             controlFlags.clear();  
       }
       return PERMIT;
+   }
+
+   private void doAuthorize(Resource resource, List<AuthorizationModule> modules, List<ControlFlag> controlFlags) throws AuthorizationException {
+      int result = invokeAuthorize(resource, modules, controlFlags);
+      if (result == PERMIT)
+         invokeCommit( modules, controlFlags );
+      if (result == DENY)
+      {
+         invokeAbort( modules, controlFlags );
+         throw new AuthorizationException(PicketBoxMessages.MESSAGES.authorizationFailedMessage());
+      }
    }
 
    //Private Methods  
